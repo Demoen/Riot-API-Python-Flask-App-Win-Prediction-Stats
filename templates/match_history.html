@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Match History</title>
+    <style>
+        body {
+            background-color: #2C2F33;
+            font-family: 'Roboto', sans-serif;
+            color: #FFF;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #23272A;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 100px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #7289DA;
+        }
+
+        p {
+            font-size: 1em;
+            color: #FFF;
+            margin-bottom: 10px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        button {
+            background-color: #7289DA;
+            color: #FFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #4468B0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Match History</h1>
+        {% for match in matches %}
+            <p>Match: {{ match }}</p>
+        {% endfor %}
+        <form action="{{ url_for('analyze_matches') }}" method="POST">
+            <input type="text" name="name" placeholder="Summoner Name" required value="{{ session['summoner_name'] }}" hidden>
+            <button type="submit">Analyze All Matches</button>
+        </form>
+    </div>
+</body>
+</html>

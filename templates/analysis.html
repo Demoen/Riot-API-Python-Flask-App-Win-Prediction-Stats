@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Match Analysis</title>
+    <style>
+        body {
+            background-color: #2C2F33;
+            font-family: 'Roboto', sans-serif;
+            color: #FFF;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #23272A;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 100px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #7289DA;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            font-size: 1em;
+            color: #FFF;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Summoner Match Analysis</h1>
+        <h3>Win Probability: {{ probability }}%</h3>
+        <h2>Average Statistics Last {{total_matches}} Games</h2>
+        <ul>
+            <li>Game Duration: {{ average_game_duration }} minutes</li>
+            <li>Kills: {{ average_kills }}</li>
+            <li>Deaths: {{ average_deaths }}</li>
+            <li>Assists: {{ average_assists }}</li>
+            <li>Gold Earned: {{ average_gold_earned }}</li>
+            <li>Total Damage to Champions: {{ average_total_damage }}</li>
+            <li>Vision Score: {{ average_vision_score }}</li>
+            <li>Turret Kills: {{ average_turret_kills }}</li>
+            <li>Dragon Kills: {{ average_dragon_kills }}</li>
+            <li>Baron Kills: {{ average_baron_kills }}</li>
+            <li>Rift Herald Takedowns: {{ average_riftHerald_takedowns }}</li>
+            <li>Lane Minions (First 10 mins): {{ average_lane_minions_first10_minutes }}</li>
+            <li>Gold Per Minute: {{ average_gold_per_minute }}</li>
+            <li>CS Advantage: {{ average_max_cs_advantage }}</li>
+            <li>Level Lead: {{ average_max_level_lead }}</li>
+        </ul>
+    </div>
+</body>
+
+</html>
