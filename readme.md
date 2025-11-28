@@ -41,6 +41,8 @@ Once the Flask server is running, open your web browser and visit `http://localh
 
 ![Screenshot 3](screenshot_3.png)
 
+![Screenshot 4](screenshot_4.png)
+
 ## How It Works
 
 1. The home page (`home.html`) allows you to enter the summoner name.

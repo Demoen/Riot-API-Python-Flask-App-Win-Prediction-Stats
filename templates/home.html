@@ -1,74 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Summoner Lookup</title>
-    <style>
-        body {
-            background-color: #2C2F33; /* Dark background for the whole body */
-            font-family: 'Roboto', sans-serif;
-            color: #FFF;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #23272A; /* Darker color than the body */
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 100px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Added box-shadow for depth */
-        }
-
-        h1 {
-            text-align: center;
-            color: #7289DA; /* Changed color to a dark blue */
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        label {
-            font-size: 1.2em;
-            color: #FFF;
-            margin-bottom: 10px;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: 1px solid #7289DA; /* Changed border color to match h1 */
-            background-color: #2C2F33; /* Same color as the body */
-            color: #FFF;
-        }
-
-        input[type="submit"] {
-            background-color: #7289DA; /* Same color as the h1 and input border */
-            color: #FFF;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #4468B0; /* Darken color when hovered over */
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoL Win Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
-        <h1>Summoner Lookup</h1>
-        <form action="/summoner" method="POST">
-            <label for="name">Summoner Name:</label><br>
-            <input type="text" id="name" name="name"><br>
-            <input type="submit" value="Submit">
-        </form>
+        <h1>League of Legends<br>Win Predictor</h1>
+
+        <div class="search-box">
+            {% if error %}
+            <div class="error-msg">{{ error }}</div>
+            {% endif %}
+
+            <form action="/summoner" method="POST">
+                <h3 style="margin-bottom: 1.5rem;">Enter Riot ID</h3>
+                <input type="text" name="riot_id" placeholder="GameName#TagLine" required>
+                <button type="submit">Analyze Profile</button>
+            </form>
+            <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                Example: Agurin#EUW, Hide on bush#KR1
+            </p>
+        </div>
     </div>
 </body>
+
 </html>

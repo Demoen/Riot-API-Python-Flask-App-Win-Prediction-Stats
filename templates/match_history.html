@@ -1,67 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Match History</title>
-    <style>
-        body {
-            background-color: #2C2F33;
-            font-family: 'Roboto', sans-serif;
-            color: #FFF;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #23272A;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 100px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            text-align: center;
-            color: #7289DA;
-        }
-
-        p {
-            font-size: 1em;
-            color: #FFF;
-            margin-bottom: 10px;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        button {
-            background-color: #7289DA;
-            color: #FFF;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 20px;
-        }
-
-        button:hover {
-            background-color: #4468B0;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match History - {{ game_name }}#{{ tag_line }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
-        <h1>Match History</h1>
-        {% for match in matches %}
-            <p>Match: {{ match }}</p>
-        {% endfor %}
-        <form action="{{ url_for('analyze_matches') }}" method="POST">
-            <input type="text" name="name" placeholder="Summoner Name" required value="{{ session['summoner_name'] }}" hidden>
-            <button type="submit">Analyze All Matches</button>
-        </form>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2>Match History: <span style="color: var(--accent-color);">{{ game_name }}#{{ tag_line }}</span></h2>
+            <a href="/" style="color: var(--text-secondary); text-decoration: none;">&larr; Back to Search</a>
+        </div>
+
+        <div class="card text-center mb-4">
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Ready to analyze your performance?</p>
+            <form action="/analyze_matches" method="POST">
+                <button type="submit">Analyze Last 20 Matches</button>
+            </form>
+        </div>
+
+        <div class="match-list">
+            {% for match in matches %}
+            <div class="match-item">
+                <div>
+                    <span style="font-weight: bold; color: var(--text-secondary);">Match ID:</span> {{ match }}
+                </div>
+                <!-- In a full app, we'd show KDA, Champ, etc. here -->
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </body>
+
 </html>
