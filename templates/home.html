@@ -4,30 +4,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoL Win Predictor</title>
+    <title>LoL Win Predictor - ML-Powered Match Analysis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body>
+<body class="home-page">
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
     <div class="container">
-        <h1>League of Legends<br>Win Predictor</h1>
-
-        <div class="search-box">
-            {% if error %}
-            <div class="error-msg">{{ error }}</div>
-            {% endif %}
-
-            <form action="/summoner" method="POST">
-                <h3 style="margin-bottom: 1.5rem;">Enter Riot ID</h3>
-                <input type="text" name="riot_id" placeholder="GameName#TagLine" required>
-                <button type="submit">Analyze Profile</button>
-            </form>
-            <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
-                Example: Agurin#EUW, Hide on bush#KR1
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="logo-container">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h1 class="hero-title">
+                <span class="gradient-text">League of Legends</span><br>
+                Win Predictor
+            </h1>
+            <p class="hero-subtitle">
+                ML-powered analysis to discover what truly impacts your wins and losses
             </p>
         </div>
+
+        <!-- Search Box -->
+        <div class="search-box-modern">
+            {% if error %}
+            <div class="error-msg animate-in">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="/summoner" method="POST" id="searchForm">
+                <div class="form-group">
+                    <label for="riot_id" class="form-label">
+                        <i class="fas fa-user"></i> Riot ID
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" 
+                               id="riot_id"
+                               name="riot_id" 
+                               placeholder="GameName#TAG" 
+                               required
+                               autocomplete="off"
+                               class="form-input">
+                        <span class="input-icon"><i class="fas fa-gamepad"></i></span>
+                    </div>
+                    <div class="input-examples">
+                        <span class="example-label">Examples:</span>
+                        <button type="button" class="example-btn" onclick="fillExample('Agurin#EUW')">Agurin#EUW</button>
+                        <button type="button" class="example-btn" onclick="fillExample('Hide on bush#KR1')">Hide on bush#KR1</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="region" class="form-label">
+                        <i class="fas fa-globe"></i> Region
+                    </label>
+                    <div class="region-selector">
+                        <div class="region-grid">
+                            <input type="radio" name="region" value="euw" id="euw" {% if selected_region == 'euw' %}checked{% endif %}>
+                            <label for="euw" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">EUW</span>
+                                <span class="region-desc">Europe West</span>
+                            </label>
+
+                            <input type="radio" name="region" value="eune" id="eune" {% if selected_region == 'eune' %}checked{% endif %}>
+                            <label for="eune" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">EUNE</span>
+                                <span class="region-desc">Europe NE</span>
+                            </label>
+
+                            <input type="radio" name="region" value="na" id="na" {% if selected_region == 'na' %}checked{% endif %}>
+                            <label for="na" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">NA</span>
+                                <span class="region-desc">North America</span>
+                            </label>
+
+                            <input type="radio" name="region" value="kr" id="kr" {% if selected_region == 'kr' %}checked{% endif %}>
+                            <label for="kr" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">KR</span>
+                                <span class="region-desc">Korea</span>
+                            </label>
+
+                            <input type="radio" name="region" value="br" id="br" {% if selected_region == 'br' %}checked{% endif %}>
+                            <label for="br" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">BR</span>
+                                <span class="region-desc">Brazil</span>
+                            </label>
+
+                            <input type="radio" name="region" value="jp" id="jp" {% if selected_region == 'jp' %}checked{% endif %}>
+                            <label for="jp" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">JP</span>
+                                <span class="region-desc">Japan</span>
+                            </label>
+
+                            <input type="radio" name="region" value="lan" id="lan" {% if selected_region == 'lan' %}checked{% endif %}>
+                            <label for="lan" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">LAN</span>
+                                <span class="region-desc">Latin Am N</span>
+                            </label>
+
+                            <input type="radio" name="region" value="las" id="las" {% if selected_region == 'las' %}checked{% endif %}>
+                            <label for="las" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">LAS</span>
+                                <span class="region-desc">Latin Am S</span>
+                            </label>
+
+                            <input type="radio" name="region" value="oce" id="oce" {% if selected_region == 'oce' %}checked{% endif %}>
+                            <label for="oce" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">OCE</span>
+                                <span class="region-desc">Oceania</span>
+                            </label>
+
+                            <input type="radio" name="region" value="tr" id="tr" {% if selected_region == 'tr' %}checked{% endif %}>
+                            <label for="tr" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">TR</span>
+                                <span class="region-desc">Turkey</span>
+                            </label>
+
+                            <input type="radio" name="region" value="ru" id="ru" {% if selected_region == 'ru' %}checked{% endif %}>
+                            <label for="ru" class="region-option">
+                                <i class="fas fa-flag"></i>
+                                <span class="region-name">RU</span>
+                                <span class="region-desc">Russia</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <span class="btn-content">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analyze Profile</span>
+                    </span>
+                    <span class="btn-shimmer"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Features -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>ML-Powered Insights</h3>
+                <p>Advanced machine learning analyzes your matches to find what truly matters</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <h3>Win vs Loss Analysis</h3>
+                <p>See exactly how your performance differs between victories and defeats</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <h3>Category Breakdown</h3>
+                <p>Understand which aspects of gameplay impact your wins the most</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-target"></i>
+                </div>
+                <h3>Actionable Metrics</h3>
+                <p>Focus on skill-based stats you can actually improve, not just results</p>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function fillExample(text) {
+            document.getElementById('riot_id').value = text;
+            document.getElementById('riot_id').focus();
+        }
+
+        // Add loading animation on form submit
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            const btn = this.querySelector('.btn-primary');
+            btn.classList.add('loading');
+            btn.querySelector('.btn-content span').textContent = 'Searching...';
+        });
+
+        // Animate elements on page load
+        window.addEventListener('load', function() {
+            document.body.classList.add('loaded');
+        });
+    </script>
 </body>
 
 </html>
