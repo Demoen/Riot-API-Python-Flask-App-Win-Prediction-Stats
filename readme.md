@@ -2,6 +2,8 @@
 
 This is a Python Flask application that uses the Riot API to analyze League of Legends match history and provides personalized insights using Machine Learning to help players understand what impacts their wins and losses.
 
+![Screenshot 1](screenshot_1.png)
+
 ## ✨ New Features
 
 - **🌍 Global Region Support**: Select from 11 regions (EUW, NA, KR, BR, JP, and more!)
@@ -24,6 +26,13 @@ This is a Python Flask application that uses the Riot API to analyze League of L
 - **Category Analysis**: Groups insights into Combat, Economy, Vision, Objectives, and Communication
 - **Performance Comparison**: Shows how your stats differ between wins and losses
 - **Modern UI**: Beautiful, animated interface with smooth interactions
+
+## Screenshots
+
+![Screenshot 1](screenshot_1.png)
+![Screenshot 2](screenshot_2.png)
+![Screenshot 3](screenshot_3.png)
+![Screenshot 4](screenshot_4.png)
 
 ## What Makes This Analyzer Different
 
@@ -166,13 +175,6 @@ The Random Forest model analyzes your performance across multiple dimensions:
 2. **Win vs Loss Comparison**: Shows exactly what you do differently in wins vs losses
 3. **Category Importance**: Identifies which aspect of gameplay matters most for YOU
 4. **Personalized Insights**: Based on your actual match data, not generic statistics
-
-## Screenshots
-
-![Screenshot 1](screenshot_1.png)
-![Screenshot 2](screenshot_2.png)
-![Screenshot 3](screenshot_3.png)
-![Screenshot 4](screenshot_4.png)
 
 ## API Rate Limits
 
