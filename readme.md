@@ -1,7 +1,5 @@
 # Flask Riot API Analyzer with ML Win Prediction
 
-This is a Python Flask application that uses the Riot API to analyze League of Legends match history and provides personalized insights using Machine Learning to help players understand what impacts their wins and losses.
-
 ![Screenshot 1](screenshot_0.png)
 
 ## ✨ New Features
