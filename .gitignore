@@ -1,5 +1,7 @@
 # Environment variables
 .env
+dev.env
+
 
 # Data Dragon assets (large folder)
 dragontail-15.23.1/
