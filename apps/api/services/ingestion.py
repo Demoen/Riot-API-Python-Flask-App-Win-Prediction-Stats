@@ -76,12 +76,7 @@ class IngestionService:
 
     async def ingest_match_history(self, user: User, count: int = 20):
         # Determine routing
-        # Mapping simple region to routing needed (e.g. euw1 -> europe)
-        routing = "europe" 
-        if user.region.startswith("na") or user.region.startswith("la") or user.region.startswith("br"):
-            routing = "americas"
-        elif user.region.startswith("kr") or user.region.startswith("jp"):
-            routing = "asia"
+        routing = self._get_routing(user.region)
             
         match_ids = await riot_service.get_match_history(routing, user.puuid, count=count)
         
@@ -103,6 +98,34 @@ class IngestionService:
                 logger.error(f"Failed to ingest match {match_id}: {e}")
                 
         return new_matches
+
+    async def ingest_match_history_generator(self, user: User, count: int = 20):
+        """Yields progress updates (current, total, match_id)"""
+        routing = self._get_routing(user.region)
+        match_ids = await riot_service.get_match_history(routing, user.puuid, count=count)
+        
+        total = len(match_ids)
+        for idx, match_id in enumerate(match_ids):
+            yield {"current": idx + 1, "total": total, "status": f"Processing match {idx + 1}/{total}"}
+            
+            # Check if exists
+            result = await self.db.execute(select(Match).where(Match.match_id == match_id))
+            if result.scalars().first():
+                continue
+                
+            # Fetch details
+            try:
+                details = await riot_service.get_match_details(routing, match_id)
+                await self.save_match(details)
+            except Exception as e:
+                logger.error(f"Failed to ingest match {match_id}: {e}")
+
+    def _get_routing(self, region: str) -> str:
+        if region.startswith("na") or region.startswith("la") or region.startswith("br"):
+            return "americas"
+        elif region.startswith("kr") or region.startswith("jp"):
+            return "asia"
+        return "europe"
 
     async def save_match(self, match_data):
         # match_data is a MatchDto object

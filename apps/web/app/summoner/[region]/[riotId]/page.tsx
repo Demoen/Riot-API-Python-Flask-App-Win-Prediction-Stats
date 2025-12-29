@@ -111,12 +111,15 @@ export default function Dashboard() {
 
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [progress, setProgress] = useState({ message: "Initializing...", percent: 0 });
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const result = await analyzeStats(riotId, region);
+                const result = await analyzeStats(riotId, region, (p) => {
+                    setProgress(p);
+                });
                 setData(result);
             } catch (err: any) {
                 setError(err.message);
@@ -129,10 +132,37 @@ export default function Dashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-zinc-500 animate-pulse">Analyzing match history...</p>
+            <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+                <div className="flex flex-col items-center gap-6 w-full max-w-md">
+                    <div className="w-20 h-20 relative">
+                        {/* Outer Spinner */}
+                        <div className="absolute inset-0 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                        {/* Inner Spinner */}
+                        <div className="absolute inset-4 border-4 border-purple-500/30 border-b-purple-500 rounded-full animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }} />
+                        {/* Center Icon */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <Gamepad2 className="w-6 h-6 text-white/50 animate-pulse" />
+                        </div>
+                    </div>
+
+                    <div className="w-full space-y-2">
+                        <div className="flex justify-between text-xs text-zinc-400 uppercase tracking-wider font-semibold">
+                            <span>{progress.message}</span>
+                            <span>{progress.percent}%</span>
+                        </div>
+                        <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-300 ease-out"
+                                style={{ width: `${progress.percent}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    <p className="text-zinc-600 text-sm text-center animate-pulse max-w-xs">
+                        {progress.percent < 20 && "Connecting to Riot API..."}
+                        {progress.percent >= 20 && progress.percent < 80 && "Analyzing recent match performance..."}
+                        {progress.percent >= 80 && "Finalizing Win Prediction..."}
+                    </p>
                 </div>
             </div>
         );
