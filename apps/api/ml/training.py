@@ -175,7 +175,7 @@ class WinPredictionModel:
         # Use ALL_FEATURES (predictive + display) for UI display
         for feature in ALL_FEATURES:
             if feature in df.columns:
-                val = float(np.average(df[feature].fillna(0), weights=weights))
+                val = float(np.average(df[feature].fillna(0).infer_objects(copy=False), weights=weights))
                 # Replace NaN/Inf with 0 for JSON compatibility
                 weighted_averages[feature] = val if math.isfinite(val) else 0.0
         
