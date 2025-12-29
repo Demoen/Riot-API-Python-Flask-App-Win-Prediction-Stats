@@ -46,7 +46,6 @@ class WinPredictionModel:
             max_depth=6,
             learning_rate=0.1,
             objective='binary:logistic',
-            use_label_encoder=False,
             eval_metric='logloss',
             random_state=42
         )
@@ -175,7 +174,9 @@ class WinPredictionModel:
         # Use ALL_FEATURES (predictive + display) for UI display
         for feature in ALL_FEATURES:
             if feature in df.columns:
-                val = float(np.average(df[feature].fillna(0).infer_objects(copy=False), weights=weights))
+                # Fix FutureWarning by explicitly converting to numeric before filling
+                series = pd.to_numeric(df[feature], errors='coerce')
+                val = float(np.average(series.fillna(0), weights=weights))
                 # Replace NaN/Inf with 0 for JSON compatibility
                 weighted_averages[feature] = val if math.isfinite(val) else 0.0
         

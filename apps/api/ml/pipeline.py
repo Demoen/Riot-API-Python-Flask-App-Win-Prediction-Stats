@@ -275,7 +275,8 @@ def prepare_features(df: pd.DataFrame, use_predictive_only: bool = True) -> pd.D
         if col not in df.columns:
             df[col] = 0
             
-    return df[features].fillna(0).infer_objects(copy=False)
+    # Fix FutureWarning by explicitly converting to numeric types
+    return df[features].apply(pd.to_numeric, errors='coerce').fillna(0)
 
 
 def get_feature_categories() -> dict:
