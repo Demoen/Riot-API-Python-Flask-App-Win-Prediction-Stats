@@ -96,10 +96,12 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
                 yield json.dumps({"type": "error", "message": str(e)}) + "\n"
                 return
 
-            yield json.dumps({"type": "progress", "message": "Training AI model...", "percent": 80}) + "\n"
+            yield json.dumps({"type": "progress", "message": "Loading match data...", "percent": 72}) + "\n"
             
             # 3. Load Data & Train
             df = await load_player_data(db, user.puuid)
+            
+            yield json.dumps({"type": "progress", "message": "Training AI model...", "percent": 75}) + "\n"
             metrics = model_instance.train(df)
             
             if "error" in metrics:
@@ -113,7 +115,7 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
                 }}) + "\n"
                 return
             
-            yield json.dumps({"type": "progress", "message": "Analyzing playstyle...", "percent": 90}) + "\n"
+            yield json.dumps({"type": "progress", "message": "Calculating performance metrics...", "percent": 78}) + "\n"
 
             # 4. Calculate weighted averages
             weighted_averages = model_instance.calculate_weighted_averages(df)
@@ -144,18 +146,26 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
                 except Exception as e:
                      print(f"Error fetching last match obj: {e}")
 
+            yield json.dumps({"type": "progress", "message": "Analyzing player mood...", "percent": 80}) + "\n"
+            
             # 6. Analyze player mood
             player_moods = model_instance.analyze_player_mood(df)
             
             # 7. Calculate win rate
             win_rate = float(df['win'].mean() * 100) if not df.empty else 50.0
             
+            yield json.dumps({"type": "progress", "message": "Analyzing territorial control...", "percent": 83}) + "\n"
+            
             # 9. Analyze territorial control
             territory_metrics = await analyze_territory_for_player(db, user.puuid, request.region)
+
+            yield json.dumps({"type": "progress", "message": "Calculating win probability...", "percent": 88}) + "\n"
 
             # 10. Win Prediction & Drivers
             raw_model_prediction = model_instance.predict_win_probability(last_match_stats)
             win_probability = (win_rate * 0.7) + (raw_model_prediction * 0.3)
+            
+            yield json.dumps({"type": "progress", "message": "Comparing with opponent...", "percent": 90}) + "\n"
             
             # --- Extract Enemy Laner Stats for Comparison ---
             enemy_stats = {}
@@ -238,8 +248,12 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
                 except Exception as e:
                     print(f"Error extracting enemy stats: {e}")
 
+            yield json.dumps({"type": "progress", "message": "Analyzing win factors...", "percent": 92}) + "\n"
+
             win_drivers = model_instance.get_win_driver_insights(df, last_match_stats, enemy_stats)
             skill_focus = model_instance.get_skill_focus(df, last_match_stats, enemy_stats)
+
+            yield json.dumps({"type": "progress", "message": "Fetching match timeline...", "percent": 95}) + "\n"
 
             # 11. Timeline Series (Gold/XP Difference)
             match_timeline_series = {}
@@ -261,6 +275,8 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
 
                  except Exception as e:
                     print(f"Error fetching timeline series: {e}")
+
+            yield json.dumps({"type": "progress", "message": "Preparing results...", "percent": 98}) + "\n"
 
             # 12. Performance Trends (Last 50 games)
             # We already have `df` which contains the last 50 games (limit=50 in load_player_data)

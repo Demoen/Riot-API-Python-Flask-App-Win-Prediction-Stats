@@ -53,9 +53,12 @@ const LOADING_STAGES = [
     { id: 1, label: "Finding Account", minPercent: 0 },
     { id: 2, label: "Fetching Ranked Info", minPercent: 8 },
     { id: 3, label: "Loading Match History", minPercent: 10 },
-    { id: 4, label: "Training AI Model", minPercent: 80 },
-    { id: 5, label: "Analyzing Playstyle", minPercent: 90 },
-    { id: 6, label: "Finalizing Results", minPercent: 95 },
+    { id: 4, label: "Training AI Model", minPercent: 72 },
+    { id: 5, label: "Analyzing Performance", minPercent: 78 },
+    { id: 6, label: "Analyzing Territorial Control", minPercent: 83 },
+    { id: 7, label: "Calculating Win Probability", minPercent: 88 },
+    { id: 8, label: "Fetching Timeline Data", minPercent: 95 },
+    { id: 9, label: "Finalizing Results", minPercent: 98 },
 ];
 
 // --- Sub-Components ---
