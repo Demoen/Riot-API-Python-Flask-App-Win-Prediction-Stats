@@ -29,16 +29,18 @@ export async function analyzeStats(
 
         while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-
-            // Process all complete lines
-            buffer = lines.pop() || ""; // Keep the last incomplete line in buffer
-
-            for (const line of lines) {
-                if (!line.trim()) continue;
+            
+            if (value) {
+                buffer += decoder.decode(value, { stream: !done });
+            }
+            
+            // Process complete lines (newline-delimited JSON)
+            let newlineIndex;
+            while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+                const line = buffer.slice(0, newlineIndex).trim();
+                buffer = buffer.slice(newlineIndex + 1);
+                
+                if (!line) continue;
 
                 try {
                     const event = JSON.parse(line);
@@ -51,12 +53,34 @@ export async function analyzeStats(
                         throw new Error(event.message);
                     }
                 } catch (e) {
-                    console.error("Error parsing stream line:", line, e);
+                    // Only log if it's not a partial chunk issue
+                    if (line.length > 0 && !line.startsWith('{')) {
+                        console.error("Error parsing stream line:", line.substring(0, 100), e);
+                    }
+                    // If parse fails, the line might be incomplete - it will be handled
+                    // when more data arrives, but since we only process on newlines,
+                    // this shouldn't happen for complete lines
                 }
+            }
+            
+            if (done) break;
+        }
+        
+        // Handle any remaining buffer content after stream ends
+        if (buffer.trim()) {
+            try {
+                const event = JSON.parse(buffer.trim());
+                if (event.type === "result") {
+                    return event.data;
+                } else if (event.type === "error") {
+                    throw new Error(event.message);
+                }
+            } catch (e) {
+                console.error("Error parsing final buffer:", buffer.substring(0, 100), e);
             }
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Analysis error:", error);
         throw error;
     }
