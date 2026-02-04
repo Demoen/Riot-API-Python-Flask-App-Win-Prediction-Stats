@@ -1,0 +1,38 @@
+# Environment variables
+.env
+dev.env
+
+
+# Data Dragon assets (large folder)
+dragontail-15.23.1/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Deployment
+*.log
+*.db
+*.sqlite
+.railway/
+node_modules/
+.next/
+dist/
+build/

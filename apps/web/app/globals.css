@@ -1,0 +1,247 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0f;
+  --foreground: #ededed;
+  --primary: #5842F4;
+  --secondary: #00D1FF;
+  --accent: #00ffd5;
+  --card-dark: #161618;
+}
+
+@layer utilities {
+  .neon-glow {
+    box-shadow: 0 0 15px rgba(88, 66, 244, 0.3);
+  }
+
+  .neon-glow-cyan {
+    box-shadow: 0 0 15px rgba(0, 209, 255, 0.3);
+  }
+
+  .neon-border {
+    box-shadow: 0 0 15px rgba(88, 66, 244, 0.2);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+  }
+
+  .bg-mesh {
+    background-image:
+      radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.2) 0, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(180, 100%, 50%, 0.1) 0, transparent 50%);
+  }
+
+
+  @theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-primary: var(--primary);
+    --color-secondary: var(--secondary);
+    --color-accent: var(--accent);
+    --color-card-dark: var(--card-dark);
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Animations */
+  @keyframes gradient-shift {
+
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes glow-pulse {
+
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-gradient-shift {
+    animation: gradient-shift 6s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Glow Effects */
+  .glow-purple {
+    box-shadow: 0 0 40px -10px rgba(168, 85, 247, 0.4);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 40px -10px rgba(34, 211, 238, 0.4);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 40px -10px rgba(234, 179, 8, 0.4);
+  }
+
+  /* Rank Colors */
+  .rank-iron {
+    color: #8B7355;
+  }
+
+  .rank-bronze {
+    color: #CD7F32;
+  }
+
+  .rank-silver {
+    color: #C0C0C0;
+  }
+
+  .rank-gold {
+    color: #FFD700;
+  }
+
+  .rank-platinum {
+    color: #00CED1;
+  }
+
+  .rank-emerald {
+    color: #50C878;
+  }
+
+  .rank-diamond {
+    color: #B9F2FF;
+  }
+
+  .rank-master {
+    color: #9B59B6;
+  }
+
+  .rank-grandmaster {
+    color: #DC143C;
+  }
+
+  .rank-challenger {
+    color: #F4C542;
+  }
+
+  .border-rank-iron {
+    border-color: #8B7355;
+  }
+
+  .border-rank-bronze {
+    border-color: #CD7F32;
+  }
+
+  .border-rank-silver {
+    border-color: #C0C0C0;
+  }
+
+  .border-rank-gold {
+    border-color: #FFD700;
+  }
+
+  .border-rank-platinum {
+    border-color: #00CED1;
+  }
+
+  .border-rank-emerald {
+    border-color: #50C878;
+  }
+
+  .border-rank-diamond {
+    border-color: #B9F2FF;
+  }
+
+  .border-rank-master {
+    border-color: #9B59B6;
+  }
+
+  .border-rank-grandmaster {
+    border-color: #DC143C;
+  }
+
+  .border-rank-challenger {
+    border-color: #F4C542;
+  }
+}

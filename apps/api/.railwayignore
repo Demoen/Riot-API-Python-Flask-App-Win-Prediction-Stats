@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+venv/
+env/
+.git/
+*.db
+*.sqlite
+*.log
+.vscode/
+.idea/
+Dockerfile
+railway.json
+README.md
+.gitignore
+.dockerignore
+node_modules/

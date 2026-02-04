@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+build/
+.git/
+*.log
+.vscode/
+.idea/
+Dockerfile
+railway.json
+README.md
+.gitignore
+.dockerignore
+.railwayignore
