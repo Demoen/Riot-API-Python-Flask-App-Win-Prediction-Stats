@@ -14,22 +14,51 @@ from pydantic import BaseModel
 from typing import Optional
 import asyncio
 import numpy as np
+import math
 import json
 
 router = APIRouter(prefix="/api")
 
-# Custom JSON encoder for numpy types
+# Custom JSON encoder for numpy types and NaN/Infinity handling
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
         if isinstance(obj, np.floating):
+            # Handle NaN and Infinity - convert to None (null in JSON)
+            if np.isnan(obj) or np.isinf(obj):
+                return None
             return float(obj)
         if isinstance(obj, np.bool_):
             return bool(obj)
         if isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, float):
+            # Handle Python native float NaN/Infinity
+            if math.isnan(obj) or math.isinf(obj):
+                return None
+            return obj
         return super().default(obj)
+
+def sanitize_for_json(obj):
+    """Recursively sanitize a data structure for JSON serialization."""
+    if isinstance(obj, dict):
+        return {k: sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize_for_json(item) for item in obj]
+    elif isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    elif isinstance(obj, (np.floating, np.integer)):
+        if isinstance(obj, np.floating) and (np.isnan(obj) or np.isinf(obj)):
+            return None
+        return obj.item()  # Convert to Python native type
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return sanitize_for_json(obj.tolist())
+    return obj
 
 # Data Dragon version for profile icons
 DDRAGON_VERSION = "14.24.1"
@@ -127,13 +156,14 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
                     "summoner_level": user.summoner_level,
                     "puuid": user.puuid
                 }
-                yield json.dumps({"type": "result", "data": {
+                partial_data = sanitize_for_json({
                     "status": "partial", 
                     "message": metrics["error"], 
                     "user": user_dict, 
                     # ... default empty structure ...
                     "win_probability": 50.0
-                }}, cls=NumpyEncoder) + "\n"
+                })
+                yield json.dumps({"type": "result", "data": partial_data}) + "\n"
                 return
             
             yield json.dumps({"type": "progress", "message": "Calculating performance metrics...", "percent": 78}) + "\n"
@@ -342,8 +372,10 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
                 "puuid": user.puuid
             }
             
-            # Use NumpyEncoder to handle numpy types from pandas DataFrames
-            yield json.dumps({"type": "result", "data": result_data}, cls=NumpyEncoder) + "\n"
+            # Sanitize the entire result to handle NaN/Infinity and numpy types
+            result_data = sanitize_for_json(result_data)
+            
+            yield json.dumps({"type": "result", "data": result_data}) + "\n"
         
         except Exception as e:
              import traceback
