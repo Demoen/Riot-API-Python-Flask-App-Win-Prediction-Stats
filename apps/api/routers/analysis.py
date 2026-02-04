@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -12,8 +13,23 @@ from models import Match, Participant
 from pydantic import BaseModel
 from typing import Optional
 import asyncio
+import numpy as np
+import json
 
 router = APIRouter(prefix="/api")
+
+# Custom JSON encoder for numpy types
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
 
 # Data Dragon version for profile icons
 DDRAGON_VERSION = "14.24.1"
@@ -29,9 +45,6 @@ REGION_TO_ROUTING = {
 class AnalyzeRequest(BaseModel):
     riot_id: str
     region: str
-
-from fastapi.responses import StreamingResponse
-import json
 
 @router.post("/analyze")
 async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)):
@@ -105,14 +118,22 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
             metrics = model_instance.train(df)
             
             if "error" in metrics:
-                # Handle partial analysis
+                # Handle partial analysis - convert user to dict
+                user_dict = {
+                    "game_name": user.game_name,
+                    "tag_line": user.tag_line,
+                    "region": user.region,
+                    "profile_icon_id": user.profile_icon_id,
+                    "summoner_level": user.summoner_level,
+                    "puuid": user.puuid
+                }
                 yield json.dumps({"type": "result", "data": {
                     "status": "partial", 
                     "message": metrics["error"], 
-                    "user": user, 
+                    "user": user_dict, 
                     # ... default empty structure ...
                     "win_probability": 50.0
-                }}) + "\n"
+                }}, cls=NumpyEncoder) + "\n"
                 return
             
             yield json.dumps({"type": "progress", "message": "Calculating performance metrics...", "percent": 78}) + "\n"
@@ -321,7 +342,8 @@ async def analyze_player(request: AnalyzeRequest, background_tasks: BackgroundTa
                 "puuid": user.puuid
             }
             
-            yield json.dumps({"type": "result", "data": result_data}) + "\n"
+            # Use NumpyEncoder to handle numpy types from pandas DataFrames
+            yield json.dumps({"type": "result", "data": result_data}, cls=NumpyEncoder) + "\n"
         
         except Exception as e:
              import traceback
