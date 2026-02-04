@@ -295,9 +295,9 @@ export function DetailedMatchAnalysis({
                             </div>
                         </div>
 
-                        <div className="bg-[#0a0a0f] border border-white/10 p-6 rounded-2xl h-[350px] relative">
+                        <div className="bg-[#0a0a0f] border border-white/10 p-6 rounded-2xl h-[350px] min-h-[350px] relative">
                             {timelineData.length > 0 ? (
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                                     <AreaChart data={timelineData}>
                                         <XAxis dataKey="minute" stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
                                         <Tooltip

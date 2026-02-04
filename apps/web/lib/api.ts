@@ -5,7 +5,6 @@ export async function analyzeStats(
     region: string,
     onProgress?: (progress: { message: string, percent: number }) => void
 ) {
-    console.log("Analyzing with API_URL:", API_URL);
 
     try {
         const response = await fetch(`${API_URL}/analyze`, {
@@ -44,24 +43,16 @@ export async function analyzeStats(
 
                 try {
                     const event = JSON.parse(line);
-                    console.log("Received event:", event.type, event.type === "progress" ? event.message : "");
 
                     if (event.type === "progress" && onProgress) {
                         onProgress({ message: event.message, percent: event.percent });
                     } else if (event.type === "result") {
-                        console.log("Received result event with data keys:", Object.keys(event.data || {}));
                         return event.data;
                     } else if (event.type === "error") {
-                        console.error("Received error event:", event.message);
                         throw new Error(event.message);
                     }
                 } catch (e) {
-                    // Only log if it's not a partial chunk issue
-                    if (line.length > 0 && !line.startsWith('{')) {
-                        console.error("Error parsing stream line:", line.substring(0, 100), e);
-                    } else if (line.startsWith('{')) {
-                        console.error("JSON parse error for line starting with '{'. Line length:", line.length, "Error:", e);
-                    }
+                    // JSON parse error - ignore partial chunks
                     // If parse fails, the line might be incomplete - it will be handled
                     // when more data arrives, but since we only process on newlines,
                     // this shouldn't happen for complete lines
@@ -81,7 +72,7 @@ export async function analyzeStats(
                     throw new Error(event.message);
                 }
             } catch (e) {
-                console.error("Error parsing final buffer:", buffer.substring(0, 100), e);
+                // Ignore parse errors on final buffer
             }
         }
         

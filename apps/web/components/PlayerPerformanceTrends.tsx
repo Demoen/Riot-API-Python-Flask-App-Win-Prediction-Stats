@@ -121,9 +121,9 @@ export function PlayerPerformanceTrends({ data, loading = false }: PlayerPerform
                     </div>
                 </div>
 
-                <div className="bg-[#0a0a0f] border border-white/10 p-6 rounded-2xl h-[350px] relative">
+                <div className="bg-[#0a0a0f] border border-white/10 p-6 rounded-2xl h-[350px] min-h-[350px] relative">
                     {chartData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorKda" x1="0" y1="0" x2="0" y2="1">
