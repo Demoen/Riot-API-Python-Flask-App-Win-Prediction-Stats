@@ -53,10 +53,6 @@ export default function Home() {
             <h2 className="text-2xl font-bold tracking-tighter uppercase italic">NEXUS<span className="text-[#5842F4]">INSIGHT</span></h2>
           </div>
           <div className="flex items-center gap-4">
-            <button className="hidden md:block text-xs font-bold uppercase tracking-widest px-4 py-2 hover:text-[#5842F4] transition-colors">Login</button>
-            <button className="bg-[#5842F4]/10 border border-[#5842F4]/30 text-[#5842F4] text-xs font-bold uppercase tracking-widest px-6 py-2.5 rounded hover:bg-[#5842F4] hover:text-white transition-all duration-300">
-              Join Nexus
-            </button>
           </div>
         </div>
       </header>
