@@ -52,6 +52,7 @@ class WinPredictionModel:
         self.model = None  # Will be calibrated model after training
         self.is_trained = False
         self.trained_df = None
+        self.cached_metrics = None  # Cache training metrics to avoid recomputation
         
         # Use refactored predictive feature categories
         self.feature_categories = get_feature_categories()
@@ -86,8 +87,9 @@ class WinPredictionModel:
         self.is_trained = True
         self.trained_df = df
         
-        # Calculate metrics
-        return self._calculate_metrics(df, X, y)
+        # Calculate metrics and cache them
+        self.cached_metrics = self._calculate_metrics(df, X, y)
+        return self.cached_metrics
     
     def _calculate_metrics(self, df: pd.DataFrame, X: pd.DataFrame, y: pd.Series):
         """Calculate training metrics and insights."""
@@ -561,8 +563,8 @@ class WinPredictionModel:
         if not self.is_trained or df.empty:
             return []
 
-        # Get insights from training data for fallback or validation
-        training_insights = self._calculate_metrics(self.trained_df, prepare_features(self.trained_df), self.trained_df['win'])
+        # Use cached metrics instead of recalculating (performance optimization)
+        training_insights = self.cached_metrics or {}
         perf_insights = training_insights.get('performance_insights', {})
 
         drivers = []
@@ -709,7 +711,8 @@ class WinPredictionModel:
         if not self.is_trained or df.empty:
             return []
             
-        training_insights = self._calculate_metrics(self.trained_df, prepare_features(self.trained_df), self.trained_df['win'])
+        # Use cached metrics instead of recalculating (performance optimization)
+        training_insights = self.cached_metrics or {}
         perf_insights = training_insights.get('performance_insights', {})
         
         improvements = []
