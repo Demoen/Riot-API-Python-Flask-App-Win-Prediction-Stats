@@ -106,7 +106,8 @@ class IngestionService:
     async def ingest_match_history_generator(self, user: User, count: int = 20):
         """
         Yields progress updates while ingesting match history.
-        Uses parallel fetching with rate limiting for performance.
+        Uses parallel fetching for API calls with rate limiting for performance.
+        DB saves are sequential to avoid session conflicts.
         """
         routing = self._get_routing(user.region)
         match_ids = await riot_service.get_match_history(routing, user.puuid, count=count)
@@ -134,34 +135,38 @@ class IngestionService:
             yield {"current": total, "total": total, "status": "All matches already cached"}
             return
         
-        # Fetch new matches in parallel with rate limiting
-        async def fetch_and_save(match_id: str, idx: int):
-            """Fetch match details with rate limiting"""
+        # Fetch match data in parallel (API calls only - no DB operations)
+        async def fetch_match_data(match_id: str):
+            """Fetch match details with rate limiting (API only, no DB)"""
             async with API_SEMAPHORE:
                 try:
                     details = await riot_service.get_match_details(routing, match_id)
-                    await self.save_match(details)
-                    return (idx, match_id, True, None)
+                    return (match_id, details, None)
                 except Exception as e:
                     logger.error(f"Failed to fetch match {match_id}: {e}")
-                    return (idx, match_id, False, str(e))
+                    return (match_id, None, str(e))
         
-        # Create tasks for all new matches
-        tasks = [
-            fetch_and_save(mid, idx) 
-            for idx, mid in enumerate(new_match_ids)
-        ]
+        # Create tasks for parallel API fetching
+        tasks = [fetch_match_data(mid) for mid in new_match_ids]
         
-        # Process results as they complete
+        # Gather all API results first (parallel)
+        yield {"current": cached_count, "total": total, "status": f"Fetching {len(new_match_ids)} matches from Riot API..."}
+        results = await asyncio.gather(*tasks)
+        
+        # Save to DB sequentially (avoids session conflicts)
         completed = cached_count
-        for coro in asyncio.as_completed(tasks):
-            result = await coro
+        for match_id, details, error in results:
             completed += 1
-            idx, match_id, success, error = result
             
-            status = f"Processing match {completed}/{total}"
-            if not success:
-                status = f"Failed {match_id}: {error}"
+            if details:
+                try:
+                    await self.save_match(details)
+                    status = f"Saved match {completed}/{total}"
+                except Exception as e:
+                    logger.error(f"Failed to save match {match_id}: {e}")
+                    status = f"Failed to save {match_id}"
+            else:
+                status = f"Failed to fetch {match_id}: {error}"
             
             yield {"current": completed, "total": total, "status": status}
 
