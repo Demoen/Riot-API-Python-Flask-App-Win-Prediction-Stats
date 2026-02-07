@@ -245,8 +245,8 @@ export default function Dashboard() {
 
             {/* Sidebar Navigation */}
             <aside className="fixed left-0 top-0 bottom-0 w-20 border-r border-white/5 bg-[#05050f]/80 backdrop-blur-xl z-50 flex flex-col items-center pt-6 pb-8 gap-8 hidden lg:flex">
-                <Link href="/" className="w-12 h-12 bg-gradient-to-br from-[#5842F4] to-[#00D1FF] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(88,66,244,0.4)] hover:scale-110 transition-transform p-0.5">
-                    <img src="/logo.png" alt="NexusInsight" className="w-full h-full object-cover rounded-xl" />
+                <Link href="/" className="w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform">
+                    <img src="/logo.png" alt="NexusInsight" className="w-full h-full object-contain" />
                 </Link>
                 <nav className="flex flex-col gap-6 mt-auto mb-auto">
                     <button onClick={() => setActiveTab("overview")} className={cn("p-3 rounded-xl transition-all", activeTab === "overview" ? "text-[#00D1FF] bg-white/5 shadow-[0_0_10px_rgba(0,209,255,0.2)]" : "text-zinc-500 hover:text-white hover:bg-white/5")}>
