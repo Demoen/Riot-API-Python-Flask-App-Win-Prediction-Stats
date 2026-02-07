@@ -3,10 +3,14 @@ from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from models import User, Match, Participant
 from services.riot import riot_service
-import json
+import asyncio
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Semaphore to limit concurrent Riot API calls (rate limiting protection)
+# Riot API has rate limits, so we cap concurrent requests
+API_SEMAPHORE = asyncio.Semaphore(5)
 
 class IngestionService:
     def __init__(self, db: AsyncSession):
@@ -100,25 +104,66 @@ class IngestionService:
         return new_matches
 
     async def ingest_match_history_generator(self, user: User, count: int = 20):
-        """Yields progress updates (current, total, match_id)"""
+        """
+        Yields progress updates while ingesting match history.
+        Uses parallel fetching with rate limiting for performance.
+        """
         routing = self._get_routing(user.region)
         match_ids = await riot_service.get_match_history(routing, user.puuid, count=count)
         
         total = len(match_ids)
-        for idx, match_id in enumerate(match_ids):
-            yield {"current": idx + 1, "total": total, "status": f"Processing match {idx + 1}/{total}"}
+        if total == 0:
+            yield {"current": 0, "total": 0, "status": "No matches found"}
+            return
+
+        yield {"current": 0, "total": total, "status": f"Found {total} matches, checking cache..."}
+        
+        # Batch check which matches already exist in DB
+        result = await self.db.execute(
+            select(Match.match_id).where(Match.match_id.in_(match_ids))
+        )
+        existing_ids = set(row[0] for row in result.fetchall())
+        
+        new_match_ids = [mid for mid in match_ids if mid not in existing_ids]
+        cached_count = len(existing_ids)
+        
+        if cached_count > 0:
+            yield {"current": cached_count, "total": total, "status": f"{cached_count} matches cached, fetching {len(new_match_ids)} new..."}
+        
+        if not new_match_ids:
+            yield {"current": total, "total": total, "status": "All matches already cached"}
+            return
+        
+        # Fetch new matches in parallel with rate limiting
+        async def fetch_and_save(match_id: str, idx: int):
+            """Fetch match details with rate limiting"""
+            async with API_SEMAPHORE:
+                try:
+                    details = await riot_service.get_match_details(routing, match_id)
+                    await self.save_match(details)
+                    return (idx, match_id, True, None)
+                except Exception as e:
+                    logger.error(f"Failed to fetch match {match_id}: {e}")
+                    return (idx, match_id, False, str(e))
+        
+        # Create tasks for all new matches
+        tasks = [
+            fetch_and_save(mid, idx) 
+            for idx, mid in enumerate(new_match_ids)
+        ]
+        
+        # Process results as they complete
+        completed = cached_count
+        for coro in asyncio.as_completed(tasks):
+            result = await coro
+            completed += 1
+            idx, match_id, success, error = result
             
-            # Check if exists
-            result = await self.db.execute(select(Match).where(Match.match_id == match_id))
-            if result.scalars().first():
-                continue
-                
-            # Fetch details
-            try:
-                details = await riot_service.get_match_details(routing, match_id)
-                await self.save_match(details)
-            except Exception as e:
-                logger.error(f"Failed to ingest match {match_id}: {e}")
+            status = f"Processing match {completed}/{total}"
+            if not success:
+                status = f"Failed {match_id}: {error}"
+            
+            yield {"current": completed, "total": total, "status": status}
 
     def _get_routing(self, region: str) -> str:
         if region.startswith("na") or region.startswith("la") or region.startswith("br"):

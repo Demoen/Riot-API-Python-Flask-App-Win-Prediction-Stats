@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, Boolean, ForeignKey, DateTime, JSON, BigInteger
+from sqlalchemy import Column, String, Integer, Float, Boolean, ForeignKey, DateTime, JSON, BigInteger, Index
 from sqlalchemy.orm import relationship
 from database import Base
 import datetime
@@ -19,7 +19,7 @@ class Match(Base):
 
     match_id = Column(String, primary_key=True, index=True)
     platform_id = Column(String)
-    game_creation = Column(BigInteger)
+    game_creation = Column(BigInteger, index=True)  # Index for ORDER BY game_creation DESC
     game_duration = Column(Integer)
     game_version = Column(String)
     queue_id = Column(Integer)
@@ -30,6 +30,9 @@ class Match(Base):
 
 class Participant(Base):
     __tablename__ = "participants"
+    __table_args__ = (
+        Index('idx_participant_puuid_match', 'puuid', 'match_id'),  # Composite index for common JOINs
+    )
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     match_id = Column(String, ForeignKey("matches.match_id"))
