@@ -87,7 +87,7 @@ function InsightBar({ label, value, color = "bg-[#5842F4]", max = 100 }: { label
         <div className="mb-3">
             <div className="flex justify-between text-xs font-bold uppercase tracking-wider mb-1">
                 <span className="text-zinc-400">{label}</span>
-                <span className="text-white">{value?.toFixed(1) || 0}</span>
+                <span className="text-white">{value?.toFixed(1) || 0}%</span>
             </div>
             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                 <div className={cn("h-full rounded-full transition-all duration-1000", color)} style={{ width: `${Math.min(((value || 0) / max) * 100, 100)}%` }} />
@@ -435,9 +435,9 @@ export default function Dashboard() {
                                     </h3>
                                     <div className="space-y-4">
                                         <InsightBar label="Combat Efficiency" value={avg.combat_efficiency} max={100} color="bg-red-500" />
-                                        <InsightBar label="Vision Control" value={avg.visionScorePerMinute * 100} max={250} color="bg-green-500" />
+                                        <InsightBar label="Vision Control" value={Math.min((avg.visionScorePerMinute * 100) / 2.5, 100)} max={100} color="bg-green-500" />
                                         <InsightBar label="Aggression" value={avg.aggressionScore} max={100} color="bg-red-600" />
-                                        <InsightBar label="Invasion Pressure" value={avg.jungleInvasionPressure} max={150} color="bg-purple-500" />
+                                        <InsightBar label="Invasion Pressure" value={Math.min(avg.jungleInvasionPressure / 1.5, 100)} max={100} color="bg-purple-500" />
                                         <InsightBar label="Consistency" value={metrics?.consistency_score || 75} max={100} color="bg-blue-400" />
                                         {territory_metrics?.time_in_enemy_territory_pct !== undefined && (
                                             <InsightBar label="Forward Pos" value={territory_metrics.time_in_enemy_territory_pct} max={100} color="bg-orange-400" />
