@@ -47,10 +47,10 @@ export default function Home() {
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05050f]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3 group cursor-pointer" onClick={() => router.push('/')}>
-            <div className="w-10 h-10 bg-gradient-to-br from-[#5842F4] to-[#00D1FF] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(0,209,255,0.3)] transition-transform group-hover:scale-105">
-              <Activity className="text-white w-6 h-6" />
+            <div className="w-12 h-12 bg-gradient-to-br from-[#5842F4] to-[#00D1FF] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(88,66,244,0.4)] transition-transform group-hover:scale-105 p-0.5">
+              <img src="/logo.png" alt="NexusInsight" className="w-full h-full object-cover rounded-xl" />
             </div>
-            <h2 className="text-2xl font-bold tracking-tighter uppercase italic">Nexus<span className="text-[#5842F4]">Insight</span></h2>
+            <h2 className="text-2xl font-bold tracking-tighter uppercase italic">NEXUS<span className="text-[#5842F4]">INSIGHT</span></h2>
           </div>
           <div className="flex items-center gap-4">
             <button className="hidden md:block text-xs font-bold uppercase tracking-widest px-4 py-2 hover:text-[#5842F4] transition-colors">Login</button>
