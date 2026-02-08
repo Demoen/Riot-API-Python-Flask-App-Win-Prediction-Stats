@@ -38,6 +38,7 @@ class WinPredictionModel:
     - Probability calibration (Platt scaling)
     - Weighted recent performance (most recent games matter more)
     - PREDICTIVE features (not outcome-correlated stats)
+    - Training cache to skip redundant retraining for same user data
     """
     
     def __init__(self):
@@ -53,15 +54,38 @@ class WinPredictionModel:
         self.is_trained = False
         self.trained_df = None
         self.cached_metrics = None  # Cache training metrics to avoid recomputation
+        self._training_cache_key = None  # Cache key to detect if retrain needed
         
         # Use refactored predictive feature categories
         self.feature_categories = get_feature_categories()
+    
+    def _get_data_cache_key(self, df: pd.DataFrame) -> str:
+        """Generate a cache key based on dataframe content to detect changes."""
+        if df.empty:
+            return ""
+        # Use: number of rows + first game creation + last game creation + sum of wins
+        # This is fast and catches most data changes
+        key_parts = [
+            str(len(df)),
+            str(df['gameCreation'].iloc[0]) if 'gameCreation' in df.columns else "0",
+            str(df['gameCreation'].iloc[-1]) if 'gameCreation' in df.columns else "0",
+            str(int(df['win'].sum())) if 'win' in df.columns else "0"
+        ]
+        return "|".join(key_parts)
         
     def train(self, df: pd.DataFrame):
         """Train the model with weighted recent performance."""
         if df.empty or len(df) < 5:
             return {"error": "Not enough data (need at least 5 matches)"}
+        
+        # Check if we can skip retraining (same data as before)
+        cache_key = self._get_data_cache_key(df)
+        if cache_key and cache_key == self._training_cache_key and self.cached_metrics:
+            logger.info(f"Skipping model training - using cached results (key: {cache_key})")
+            return self.cached_metrics
             
+        logger.info(f"Training model with new data (key: {cache_key})")
+        
         X = prepare_features(df)
         y = df['win']
         
@@ -86,6 +110,7 @@ class WinPredictionModel:
             
         self.is_trained = True
         self.trained_df = df
+        self._training_cache_key = cache_key  # Save cache key for next request
         
         # Calculate metrics and cache them
         self.cached_metrics = self._calculate_metrics(df, X, y)
