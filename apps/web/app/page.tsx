@@ -2,143 +2,215 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Sparkles, Zap, Clock, Trophy, Target, Eye, Activity, ArrowRight } from "lucide-react";
+import { Zap, Trophy, Target, Eye, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const REGIONS = [
-  { id: "euw", name: "Europe West", label: "EUW" },
-  { id: "eune", name: "Europe Nordic & East", label: "EUNE" },
-  { id: "na", name: "North America", label: "NA" },
-  { id: "kr", name: "Korea", label: "KR" },
-  { id: "br", name: "Brazil", label: "BR" },
-  { id: "lan", name: "Latin America North", label: "LAN" },
-  { id: "las", name: "Latin America South", label: "LAS" },
-  { id: "oce", name: "Oceania", label: "OCE" },
-  { id: "tr", name: "Turkey", label: "TR" },
-  { id: "ru", name: "Russia", label: "RU" },
-  { id: "jp", name: "Japan", label: "JP" },
-];
+import { SearchBar } from "@/components/SearchBar";
+import { ElectricMap } from "@/components/ElectricMap";
 
 export default function Home() {
   const router = useRouter();
+  // Lifted state to pass to SearchBar and control from Popular Profiles
   const [riotId, setRiotId] = useState("");
   const [region, setRegion] = useState("euw");
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!riotId.includes("#")) {
+  const handleSearch = async (searchId: string, searchRegion: string) => {
+    if (!searchId.includes("#")) {
       alert("Please use format Name#Tag");
       return;
     }
-    setLoading(true);
-    const encodedId = encodeURIComponent(riotId);
-    router.push(`/summoner/${region}/${encodedId}`);
-    setLoading(false);
+    const encodedId = encodeURIComponent(searchId);
+    router.push(`/summoner/${searchRegion}/${encodedId}`);
   };
 
   return (
     <main className="min-h-screen bg-[#05050f] text-white flex flex-col font-sans selection:bg-[#5842F4]/30 relative overflow-hidden">
-      {/* Background Mesh */}
-      <div className="fixed inset-0 z-0 opacity-40 pointer-events-none bg-mesh"></div>
-      <div className="fixed inset-0 z-[-1] opacity-20 pointer-events-none" style={{ backgroundImage: "radial-gradient(#1e293b 1px, transparent 1px)", backgroundSize: "40px 40px" }}></div>
+
+      {/* ========== CSS Background System ========== */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-gradient-to-br from-[#0a0a18] via-[#05050f] to-[#080812]"></div>
+
+      {/* Animated lane glows */}
+      <div className="fixed z-0 pointer-events-none animate-lane-glow" style={{ top: '5%', left: '5%', width: '45%', height: '3px', background: 'linear-gradient(90deg, rgba(88, 66, 244, 0.3), transparent)', transform: 'rotate(25deg)', transformOrigin: 'left center', filter: 'blur(8px)' }}></div>
+      <div className="fixed z-0 pointer-events-none animate-lane-glow" style={{ top: '50%', left: '50%', width: '70%', height: '2px', background: 'linear-gradient(90deg, rgba(0, 209, 255, 0.15), rgba(88, 66, 244, 0.15))', transform: 'translate(-50%, -50%) rotate(-45deg)', filter: 'blur(12px)', animationDelay: '1s' }}></div>
+      <div className="fixed z-0 pointer-events-none animate-lane-glow" style={{ bottom: '10%', right: '5%', width: '40%', height: '3px', background: 'linear-gradient(270deg, rgba(0, 255, 213, 0.2), transparent)', transform: 'rotate(25deg)', transformOrigin: 'right center', filter: 'blur(8px)', animationDelay: '2s' }}></div>
+
+      {/* Objective glows */}
+      <div className="fixed z-0 pointer-events-none animate-energy-pulse" style={{ bottom: '25%', right: '30%', width: '120px', height: '120px', background: 'radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(20px)' }}></div>
+      <div className="fixed z-0 pointer-events-none animate-energy-pulse" style={{ top: '20%', left: '25%', width: '100px', height: '100px', background: 'radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(20px)', animationDelay: '1.5s' }}></div>
+
+      {/* Hextech scan line */}
+      <div className="fixed z-0 pointer-events-none animate-hextech-scan" style={{ left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0, 209, 255, 0.3), transparent)' }}></div>
+
+      {/* Grid overlay */}
+      <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "radial-gradient(#5842F4 1px, transparent 1px)", backgroundSize: "60px 60px" }}></div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05050f]/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => router.push('/')}>
-            <div className="w-12 h-12 flex items-center justify-center transition-transform group-hover:scale-105">
+      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#05050f]/90 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 group cursor-pointer" onClick={() => router.push('/')}>
+            <div className="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-105">
               <img src="/logo.png" alt="NexusInsight" className="w-full h-full object-contain" />
             </div>
-            <h2 className="text-2xl font-bold tracking-tighter uppercase italic">NEXUS<span className="text-[#5842F4]">INSIGHT</span></h2>
-          </div>
-          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-bold tracking-tight uppercase">
+              <span className="text-white/90">NEXUS</span>
+              <span className="text-[#00D1FF]">INSIGHT</span>
+            </h2>
           </div>
         </div>
       </header>
 
-      <div className="relative z-10 flex flex-col items-center pt-20 pb-32 px-4 text-center">
+      <div className="relative z-10 flex flex-col items-center px-6 py-8">
 
-        {/* Main Title Section */}
-        <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/5 border border-white/10 text-[#00D1FF] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">
-          <span className="flex h-2 w-2 rounded-full bg-[#00D1FF] animate-pulse"></span>
-          Random Forest Intelligence v4.2
-        </div>
+        {/* Hero Section - Two Column Layout */}
+        <div className="w-full max-w-6xl mx-auto mb-8">
 
-        <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9] uppercase italic max-w-5xl mx-auto">
-          Data-Driven <br />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00f2ff] to-[#7000ff]">Performance</span>
-        </h1>
+          {/* Top Row: Hero Text (Left) + Electric Map (Right) */}
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center justify-center mb-10">
 
-        <p className="text-slate-400 text-lg md:text-xl max-w-2xl mb-12 font-light mx-auto leading-relaxed">
-          Transform your gameplay with neural network analysis. Get precise benchmarks against high-ELO archetypes and master the meta.
-        </p>
+            {/* Left: Text Content */}
+            <div className="flex flex-col justify-center">
+              {/* Subtle label */}
+              <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-3">
+                <span>Performance Analytics</span>
+                <div className="w-6 h-px bg-gradient-to-l from-transparent to-[#00D1FF]/50"></div>
+              </div>
 
-        {/* Search Bar */}
-        <div className="w-full max-w-3xl glass p-1.5 rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(0,242,255,0.15)] mb-12 transform hover:scale-[1.01] transition-all duration-500">
-          <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-1">
-            <div className="relative flex-1 group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5842F4] w-6 h-6" />
-              <input
-                className="w-full h-16 bg-white/5 border-none outline-none focus:ring-0 focus:bg-white/10 pl-14 text-white placeholder:text-slate-500 font-bold text-lg rounded-xl transition-all"
-                placeholder="SUMMONER NAME #TAG"
-                type="text"
-                value={riotId}
-                onChange={(e) => setRiotId(e.target.value)}
-              />
+              {/* Main Title */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-3 leading-[1.1]">
+                <span className="text-white/90">Find your </span>
+                <span className="relative inline-block">
+                  <span className="text-[#00D1FF] relative z-10">EDGE</span>
+                  <span className="absolute -left-2.5 top-1/2 -translate-y-1/2 text-[#00D1FF]/30 text-2xl font-light">[</span>
+                  <span className="absolute -right-2.5 top-1/2 -translate-y-1/2 text-[#00D1FF]/30 text-2xl font-light">]</span>
+                </span>
+              </h1>
+
+              <p className="text-slate-400 text-sm lg:text-base max-w-sm leading-relaxed">
+                Deep match analysis powered by data. See exactly where you stand against the competition.
+              </p>
             </div>
-            <div className="flex items-center gap-1 bg-white/5 px-2 rounded-xl border border-white/5">
-              <select
-                className="bg-transparent border-none outline-none text-xs font-bold uppercase tracking-widest text-slate-300 h-full cursor-pointer min-w-[80px]"
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-              >
-                {REGIONS.map((r) => (
-                  <option key={r.id} value={r.id} className="bg-[#0a0a0f]">{r.label}</option>
-                ))}
-              </select>
+
+            {/* Right: Electric Map */}
+            <div className="w-full lg:w-[320px] shrink-0">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-white/[0.06]">
+                {/* Frame corners */}
+                <div className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-[#00D1FF]/40 z-10"></div>
+                <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-[#00D1FF]/40 z-10"></div>
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-l-2 border-b-2 border-[#5842F4]/40 z-10"></div>
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-[#5842F4]/40 z-10"></div>
+
+                {/* Map container - no clip-path, full display */}
+                <div className="w-full h-full">
+                  <ElectricMap />
+                </div>
+
+                {/* Label */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] uppercase tracking-[0.3em] text-slate-600 bg-[#05050f]/80 px-2 py-0.5 rounded">
+                  Summoner&apos;s Rift
+                </div>
+              </div>
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-[#5842F4] text-white h-16 px-10 rounded-xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 min-w-[160px]"
-            >
-              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>Analyze <ArrowRight className="w-5 h-5" /></>}
-            </button>
-          </form>
-        </div>
-
-        {/* Popular Profiles */}
-        <div className="flex flex-wrap justify-center gap-6 text-slate-500 mb-24">
-          <span className="text-[10px] font-black uppercase tracking-widest self-center opacity-50">Popular Profiles:</span>
-          <button onClick={() => { setRiotId("Agurin#EUW"); setRegion("euw"); }} className="text-[11px] font-bold uppercase tracking-widest hover:text-[#5842F4] border-b border-transparent hover:border-[#5842F4] transition-all">Agurin#EUW</button>
-          <button onClick={() => { setRiotId("Caps#EUW"); setRegion("euw"); }} className="text-[11px] font-bold uppercase tracking-widest hover:text-[#5842F4] border-b border-transparent hover:border-[#5842F4] transition-all">Caps#EUW</button>
-          <button onClick={() => { setRiotId("Faker#KR1"); setRegion("kr"); }} className="text-[11px] font-bold uppercase tracking-widest hover:text-[#5842F4] border-b border-transparent hover:border-[#5842F4] transition-all">Faker#KR1</button>
-        </div>
-
-        {/* Feature Pillars */}
-        <div className="w-full max-w-7xl mx-auto px-6">
-          <div className="flex flex-col items-center mb-16 text-center">
-            <h2 className="text-xs font-black text-[#00D1FF] uppercase tracking-[0.5em] mb-4">The Analytic Framework</h2>
-            <h3 className="text-3xl md:text-5xl font-black tracking-tighter italic uppercase text-white">The Five Pillars of Mastery</h3>
-            <div className="w-24 h-1 bg-gradient-to-r from-[#5842F4] to-[#00D1FF] mt-6 rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {/* Centered Search Bar */}
+          <div className="w-full max-w-2xl mx-auto mb-4">
+            <SearchBar
+              onSearch={handleSearch}
+              initialRiotId={riotId}
+              initialRegion={region}
+            />
+          </div>
+
+          {/* Quick Links */}
+          <div className="flex items-center justify-center gap-3 text-xs">
+            <span className="text-slate-600 uppercase tracking-wider">Try:</span>
+            <button onClick={() => { setRiotId("Agurin#EUW"); setRegion("euw"); }} className="text-slate-500 hover:text-[#00D1FF] transition-colors font-medium">Agurin#EUW</button>
+            <span className="text-slate-700">•</span>
+            <button onClick={() => { setRiotId("Caps#EUW"); setRegion("euw"); }} className="text-slate-500 hover:text-[#00D1FF] transition-colors font-medium">Caps#EUW</button>
+            <span className="text-slate-700">•</span>
+            <button onClick={() => { setRiotId("Faker#KR1"); setRegion("kr"); }} className="text-slate-500 hover:text-[#00D1FF] transition-colors font-medium">Faker#KR1</button>
+          </div>
+        </div>
+
+        {/* Stat Categories */}
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {[
-              { title: "Combat", icon: Trophy, color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/30", glow: "group-hover:bg-red-500/20", desc: "Lethality metrics, kill participation, and pressure heatmaps." },
-              { title: "Economy", icon: Target, color: "text-[#00ffd5]", bg: "bg-[#00ffd5]/10", border: "border-[#00ffd5]/30", glow: "group-hover:bg-[#00ffd5]/20", desc: "Gold efficiency curves and itemization timing analysis." },
-              { title: "Vision", icon: Eye, color: "text-[#5842F4]", bg: "bg-[#5842F4]/10", border: "border-[#5842F4]/30", glow: "group-hover:bg-[#5842F4]/20", desc: "Warding patterns, fog-of-war coverage, and predictions." },
-              { title: "Objectives", icon: Zap, color: "text-[#00D1FF]", bg: "bg-[#00D1FF]/10", border: "border-[#00D1FF]/30", glow: "group-hover:bg-[#00D1FF]/20", desc: "Neutral priority analysis and tower pressure metrics." },
-              { title: "Sync", icon: Activity, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/30", glow: "group-hover:bg-emerald-500/20", desc: "Team synergy factors, ping responsiveness scores." }
+              { title: "Combat", icon: Trophy, accent: "#ef4444", stat: "KDA & Damage", desc: "Kill pressure, fight timing, and lethality patterns" },
+              { title: "Economy", icon: Target, accent: "#00ffd5", stat: "Gold & CS", desc: "Income efficiency and itemization tempo" },
+              { title: "Vision", icon: Eye, accent: "#5842F4", stat: "Ward Score", desc: "Map control, denial, and prediction accuracy" },
+              { title: "Objectives", icon: Zap, accent: "#00D1FF", stat: "Obj. Control", desc: "Dragon soul priority and tower pressure" },
+              { title: "Teamplay", icon: Activity, accent: "#22c55e", stat: "Synergy", desc: "Roaming impact and team coordination" }
             ].map((item, i) => (
-              <div key={i} className="group relative glass p-8 rounded-3xl hover:border-opacity-50 transition-all duration-500 overflow-hidden text-left border border-white/5">
-                <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl transition-all opacity-0 group-hover:opacity-100 ${item.bg}`}></div>
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-500 ${item.bg} ${item.border} border ${item.color}`}>
-                  <item.icon className="w-7 h-7" />
+              <div
+                key={i}
+                className="group relative overflow-hidden transition-all duration-300"
+              >
+                {/* Card background with angular clip */}
+                <div
+                  className="relative p-5 bg-[#0d0d15] border border-white/[0.04] transition-all duration-300 group-hover:border-white/[0.08]"
+                  style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}
+                >
+                  {/* Top corner accent */}
+                  <div
+                    className="absolute top-0 right-0 w-3 h-3 transition-all duration-300 group-hover:scale-150 group-hover:opacity-80"
+                    style={{
+                      background: `linear-gradient(135deg, ${item.accent}40 0%, transparent 50%)`,
+                    }}
+                  ></div>
+
+                  {/* Bottom corner accent */}
+                  <div
+                    className="absolute bottom-0 left-0 w-3 h-3 transition-all duration-300"
+                    style={{
+                      background: `linear-gradient(-45deg, ${item.accent}20 0%, transparent 50%)`,
+                    }}
+                  ></div>
+
+                  {/* Hover glow line at top */}
+                  <div
+                    className="absolute top-0 left-0 right-3 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: `linear-gradient(90deg, ${item.accent}00, ${item.accent}60, ${item.accent}00)` }}
+                  ></div>
+
+                  {/* Icon with hex-inspired background */}
+                  <div className="relative mb-4">
+                    <div
+                      className="w-10 h-10 flex items-center justify-center transition-all duration-300 group-hover:scale-105"
+                      style={{
+                        background: `linear-gradient(135deg, ${item.accent}15 0%, transparent 60%)`,
+                        clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)"
+                      }}
+                    >
+                      <item.icon className="w-5 h-5 transition-colors duration-300" style={{ color: item.accent }} />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h4 className="font-bold text-sm text-white/90 uppercase tracking-wide mb-1">{item.title}</h4>
+
+                  {/* Stat tag */}
+                  <div
+                    className="inline-block text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 mb-3 transition-colors duration-300"
+                    style={{
+                      color: item.accent,
+                      background: `${item.accent}15`,
+                    }}
+                  >
+                    {item.stat}
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+
+                  {/* Scanline effect on hover */}
+                  <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] pointer-events-none transition-opacity duration-300"
+                    style={{
+                      backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, white 2px, white 3px)",
+                    }}
+                  ></div>
                 </div>
-                <h4 className="font-black text-xl uppercase tracking-tight mb-3 italic">{item.title}</h4>
-                <p className="text-sm text-slate-400 leading-relaxed font-light">{item.desc}</p>
               </div>
             ))}
           </div>
